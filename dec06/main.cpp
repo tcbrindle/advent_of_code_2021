@@ -15,18 +15,6 @@ constexpr auto read_vector = [](const char* filename) -> std::vector<int>
     return vec;
 };
 
-constexpr auto process_day = [](std::array<int64_t, 9> counts, int = 0) -> std::array<int64_t, 9>
-{
-    std::array<int64_t, 9> next_counts{};
-
-    std::copy(counts.begin() + 1, counts.end(), next_counts.begin());
-
-    next_counts[6] += counts[0];
-    next_counts[8] += counts[0];
-
-    return next_counts;
-};
-
 constexpr auto process = [](const auto& input, int days)
 {
     std::array<int64_t, 9> counts{};
@@ -35,7 +23,11 @@ constexpr auto process = [](const auto& input, int days)
         ++counts[i];
     }
 
-    return flow::sum(flow::ints(0, days).fold(process_day, counts));
+    flow::ints(0, days).for_each([&](int i) {
+        counts[(i + 7) % 9] += counts[i % 9];
+    });
+
+    return flow::sum(counts);
 };
 
 constexpr std::array test_data = { 3, 4, 3, 1, 2 };
