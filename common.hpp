@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <numeric>
+#include <span>
 #include <sstream>
 #include <string>
 #include <string_view>
