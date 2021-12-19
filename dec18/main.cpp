@@ -41,40 +41,53 @@ constexpr auto to_string = [](number const& n) -> std::string
 
 constexpr auto explode = [](number& n) -> bool
 {
+    // Scan from the front of the vector to find the start of a pair with depth 5
     auto iter = n.begin();
-    int depth = 0;
 
-    while (iter != n.end()) {
-        if (*iter == open_br) {
-            ++depth;
-        } else if (*iter == close_br) {
-            --depth;
+    {
+        int depth = 0;
+
+        while (iter != n.end()) {
+            if (*iter == open_br) {
+                ++depth;
+            } else if (*iter == close_br) {
+                --depth;
+            }
+            if (depth == 5) {
+                break;
+            }
+            ++iter;
         }
-        if (depth == 5) {
-            break;
-        }
-        ++iter;
     }
 
+    // If we didn't find one, then there are no explosions to process
     if (iter == n.end()) {
         return false;
     }
 
-    int first = *rng::next(iter);
-    int second = *rng::next(iter, 3);
+    // Grab the first and second values of the pair
+    int8_t first = *rng::next(iter);
+    int8_t second = *rng::next(iter, 3);
 
-    auto prev = rng::find_if(std::reverse_iterator(iter), n.rend(), flow::pred::geq(0));
-
-    if (prev != n.rend()) {
-        *prev += first;
+    // Scan backwards from the start of the pair to find the previous value
+    // If it exists, adjust it
+    {
+        auto prev = rng::find_if(std::reverse_iterator(iter), n.rend(), flow::pred::geq(0));
+        if (prev != n.rend()) {
+            *prev += first;
+        }
     }
 
-    auto next = rng::find_if(iter + 5, n.end(), flow::pred::geq(0));
-
-    if (next != n.end()) {
-        *next += second;
+    // Scan forwards from the end of the pair to find the next value
+    // If it exists, adjust it
+    {
+        auto next = rng::find_if(iter + 5, n.end(), flow::pred::geq(0));
+        if (next != n.end()) {
+            *next += second;
+        }
     }
 
+    // Finally, remove the offending pair and replace it with a zero value
     iter = n.erase(iter, iter + 5);
     n.insert(iter, 0);
 
